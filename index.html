@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Scales</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <style>
+      body {
+        background-color: #333;
+        color: #ddd;
+        font-family: Helvetica, Arial, sans-serif;
+        font-size: 1.4em;
+        text-align: center;
+      }
+      ul {
+        list-style-type: none;
+        padding: 0;
+        margin: 1em 0 0;
+      }
+      li {
+        line-height: 1.4em;
+        padding: auto 0;
+        margin: auto 0;
+      }
+      button {
+        margin-top: 1em;
+        padding: .5em 1em;
+        border-radius: .5em;
+        box-sizing: border-box;
+        border-width: 0;
+        font-size: .75em;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="content">
+      <ul id="keys"></ul>
+      <div id="controls">
+        <button id="reload" type="button">Reload</button>
+      </div>
+    </div>
+  </body>
+  <script>
+    const keys = [ 'C#/Db', 'C', 'Eb/D#', 'E', 'B/Cb', 'A', 'D', 'Ab/G#', 'Bb/A#', 'F', 'G', 'F#/Gb' ]
+    const reload = document.querySelector("#reload");
+    const shuffle = (array) => {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [ array[ i ], array[ j ] ] = [ array[ j ], array[ i ] ];
+      }
+      return array;
+    }; 
+    
+    const doShuffle = (keys) => {
+      for (const key of shuffle(keys)) {
+        const node = document.createElement("li");
+        const textnode = document.createTextNode(key);
+        node.appendChild(textnode);
+        document.getElementById("keys").appendChild(node);
+      }
+    }
+
+    window.addEventListener("load", (event) => {
+      doShuffle(keys)
+    });
+
+    reload.addEventListener("click", () => {
+      document.getElementById("keys").innerHTML = ""
+      doShuffle(keys)
+    });
+  
+  </script>
+</html>
