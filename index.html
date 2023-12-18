@@ -45,13 +45,13 @@
         align-items: center; 
         width: 100%;
       }
-      #start { 
+      .green { 
         background-color: #009779; 
       } 
-      #stop { 
-          background-color: #0e85fc; 
+      .orange { 
+          background-color: #fd950d; 
       } 
-      #reset { 
+      #clear-button { 
           background-color: #D35943; 
       }
       #display-timer {
@@ -63,6 +63,10 @@
       }
       .arrow {
         font-size: .5em;
+      }
+      p.stopwatch {
+        margin: 0;
+        padding: 0;
       }
       #bottomLine {
         border-bottom: 1px solid #444;
@@ -83,16 +87,11 @@
       </div>
       <div id="timer" class="hide">
         <div id="time">
-          <span class="digit" id="min">00</span>
-          <span class="txt">:</span>
-          <span class="digit" id="sec">00</span>
-          <span class="txt">:</span>
-          <span class="digit" id="count">00</span>
-        </div>
-        <div id="buttons">
-          <button class="btn" id="start">Start</button>
-          <button class="btn" id="stop">Stop</button>
-          <button class="btn" id="reset">Reset</button>
+          <div class="control-buttons-wrapper">
+            <p class="stopwatch">00:00:00</p>
+            <button id="main-button" class="control-buttons green">Start</button>
+            <button id="clear-button" class="control-buttons">Clear</button>
+          </div>
         </div>
         <div id="bottomLine"></div>
       </div>
@@ -137,92 +136,62 @@
     let timer = document.getElementById('timer')
 
     showTimer.addEventListener('click', function () {
-      showTimer.classList.remove('show');
-      showTimer.classList.add('hide');
-      hideTimer.classList.remove('hide');
-      hideTimer.classList.add('show');
-      timer.classList.remove('hide');
-      timer.classList.add('show-flex');
+      showTimer.classList.replace('show','hide');
+      hideTimer.classList.replace('hide','show');
+      timer.classList.replace('hide','show-flex');
     });
 
     hideTimer.addEventListener('click', function () {
-      showTimer.classList.remove('hide');
-      showTimer.classList.add('show');
-      hideTimer.classList.remove('show');
-      hideTimer.classList.add('hide');
-      timer.classList.remove('show-flex');
-      timer.classList.add('hide');
+      showTimer.classList.replace('hide','show');
+      hideTimer.classList.replace('show','hide');
+      timer.classList.replace('show-flex','hide');
     });
 
-    // timer
-    const startBtn = document.getElementById('start');
-    const stopBtn = document.getElementById('stop');
-    const resetBtn = document.getElementById('reset');
-    let minute = 0o0;
-    let second = 0o0;
-    let count = 0o0;
-    let timerTime;
+    // timer https://github.com/chrislemus/stopwatch-using-javascript
+    const time = document.querySelector('.stopwatch')
+    const mainButton = document.querySelector('#main-button')
+    const clearButton = document.querySelector('#clear-button')
+    const stopwatch = {elapsedTime: 0}
 
-    startBtn.addEventListener('click', function () {
-      timerTime = true;
-      stopWatch();
-    });
-
-    stopBtn.addEventListener('click', function () {
-      timerTime = false;
-    });
-
-    resetBtn.addEventListener('click', function () {
-      timerTime = false;
-      minute = 0;
-      second = 0;
-      count = 0;
-      document.getElementById('min').innerHTML = "00";
-      document.getElementById('sec').innerHTML = "00";
-      document.getElementById('count').innerHTML = "00";
-    });
-
-    function stopWatch() {
-      if (timerTime) {
-        count++;
-
-        if (count == 100) {
-          second++;
-          count = 0;
-        }
-
-        if (second == 60) {
-          minute++;
-          second = 0;
-        }
-
-        if (minute == 60) {
-          minute = 0;
-          second = 0;
-        }
-
-        let minString = minute;
-        let secString = second;
-        let countString = count;
-
-        if (minute < 10) {
-          minString = "0" + minString;
-        }
-
-        if (second < 10) {
-          secString = "0" + secString;
-        }
-
-        if (count < 10) {
-          countString = "0" + countString;
-        }
-
-        document.getElementById('min').innerHTML = minString;
-        document.getElementById('sec').innerHTML = secString;
-        document.getElementById('count').innerHTML = countString;
-        setTimeout(stopWatch, 10);
+    mainButton.addEventListener('click', () => {
+      if (mainButton.innerHTML === 'Start') {
+        startStopwatch();
+        mainButton.innerHTML = 'Stop';
+        mainButton.classList.replace('green','orange');
+      } else {
+        stopwatch.elapsedTime += Date.now() - stopwatch.startTime
+        clearInterval(stopwatch.intervalId);
+        mainButton.innerHTML = 'Start';
+        mainButton.classList.replace('orange', 'green');
       }
+    })
+
+    clearButton.addEventListener('click', () => {
+      stopwatch.elapsedTime = 0
+      stopwatch.startTime = Date.now()
+      displayTime(0, 0, 0, 0)
+    })
+
+    function startStopwatch() {
+      //reset start time
+      stopwatch.startTime = Date.now();
+      //run `setInterval()` and save id
+      stopwatch.intervalId = setInterval(() => {
+        //calculate elapsed time
+        const elapsedTime = Date.now() - stopwatch.startTime + stopwatch.elapsedTime
+        //calculate different time measurements based on elapsed time
+        const milliseconds = parseInt((elapsedTime % 1000) / 10)
+        const seconds = parseInt((elapsedTime / 1000) % 60)
+        const minutes = parseInt((elapsedTime / (1000 * 60)) % 60)
+        //display time
+        displayTime(minutes, seconds, milliseconds)
+      }, 100);
     }
-  
+
+    function displayTime(minutes, seconds, milliseconds) {
+      const leadZeroTime = [ minutes, seconds, milliseconds ].map(time => time < 10 ? `0${time}` : time)
+      time.innerHTML = leadZeroTime.join(':')
+    }
+
   </script>
 </html>
