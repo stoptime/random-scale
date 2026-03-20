@@ -73,6 +73,12 @@
         width: 300px;
         margin: 0.5em auto 0;
       }
+      .highlight {
+        color: yellow;
+      }
+      li.highlight:focus-visible {
+        outline: none;
+      }
       /* yeah i hate it too */
       .hide { display: none !important }
       .show { display: block !important }
@@ -113,21 +119,55 @@
     }; 
     
     const doShuffle = (keys) => {
+      let it = 0;
       for (const key of shuffle(keys)) {
         const node = document.createElement("li");
+        node.role = "menuitem";
+        node.tabIndex = it === 0 ? "0" : "-1";
+        if (it === 0) node.classList.add('highlight');
         const textnode = document.createTextNode(key);
         node.appendChild(textnode);
         document.getElementById("keys").appendChild(node);
+        it++;
       }
     }
 
     window.addEventListener("load", (event) => {
       doShuffle(keys);
+      // highlighting options
+      document.addEventListener('keydown', (e) => {
+        const items = document.querySelectorAll('#keys li');
+        let currentIndex = Array.from(items).findIndex(item => item.tabIndex === 0);
+        let nextIndex = currentIndex;
+
+        if (e.key === 'ArrowUp') {
+          nextIndex = Math.max(0, currentIndex - 1); // Prevent going above the first item
+          e.preventDefault(); // Prevent default browser scrolling
+        } else if (e.key === 'ArrowDown') {
+          nextIndex = Math.min(items.length - 1, currentIndex + 1); // Prevent going below the last item
+          e.preventDefault();
+        }
+
+        if (nextIndex !== currentIndex) {
+          // Remove highlight/focus from current item
+          items[ currentIndex ].classList.remove('highlight');
+          items[ currentIndex ].tabIndex = -1;
+
+          // Add highlight/focus to the next item
+          items[ nextIndex ].classList.add('highlight');
+          items[ nextIndex ].tabIndex = 0;
+          items[ nextIndex ].focus(); // Programmatically set focus
+        }
+      });
+
+      handleMouseClick();
+
     });
 
     reload.addEventListener("click", () => {
       document.getElementById("keys").innerHTML = "";
       doShuffle(keys);
+      handleMouseClick();
     });
 
     // show/hide timer
@@ -191,6 +231,24 @@
     function displayTime(minutes, seconds, milliseconds) {
       const leadZeroTime = [ minutes, seconds, milliseconds ].map(time => time < 10 ? `0${time}` : time)
       time.innerHTML = leadZeroTime.join(':')
+    }
+
+    function handleMouseClick() {
+      // Add click handling for mouse users
+      document.querySelectorAll('#keys li').forEach((item, index) => {
+        item.addEventListener('click', () => {
+          // Remove previous highlights
+          document.querySelectorAll('#keys li').forEach(li => {
+            li.classList.remove('highlight');
+            li.tabIndex = -1;
+          });
+
+          // Add highlight to clicked item
+          item.classList.add('highlight');
+          item.tabIndex = 0;
+          item.focus();
+        });
+      });
     }
 
   </script>
